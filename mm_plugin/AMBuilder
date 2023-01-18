@@ -1,0 +1,71 @@
+# vim: set sts=2 ts=8 sw=2 tw=99 et ft=python:
+import os, sys
+
+project = builder.LibraryProject('servertools')
+project.sources = [
+  'main.cpp',
+  'gameconfig.cpp',
+  'helpers.cpp',
+  'tools_navmesh.cpp',
+  'modulescanner/scanner.cpp',
+  'sdk/sdk.cpp',
+  'sdk/baseentity.cpp',
+  'sdk/baseentityoutput.cpp',
+  'sdk/servernetworkproperty.cpp',
+  'sdk/collisionproperty.cpp',
+  'sdk/baseanimating.cpp',
+  'sdk/baseanimatingoverlay.cpp',
+  'sdk/basecombatcharacter.cpp',
+  'sdk/basetoggle.cpp',
+  'sdk/basepropdoor.cpp',
+  'sdk/funcbrush.cpp',
+  'sdk/nav_area.cpp',
+  'sdk/nav_mesh.cpp',
+  'sdk/tracefilter_simple.cpp',
+  'sdk/takedamageinfo.cpp',
+  'sdk/util.cpp',
+  'sdk/ndebugoverlay.cpp',
+  'sdk/NextBot/NextBot.cpp',
+  'sdk/NextBot/NextBotInterface.cpp',
+  'sdk/NextBot/NextBotIntentionInterface.cpp',
+  'sdk/NextBot/NextBotBodyInterface.cpp',
+  'sdk/NextBot/NextBotVisionInterface.cpp',
+  'sdk/NextBot/NextBotComponentInterface.cpp',
+  'sdk/NextBot/NextBotManager.cpp',
+  'sdk/NextBot/NextBotLocomotionInterface.cpp',
+  'sdk/NextBot/NextBotGroundLocomotion.cpp',
+  'sdk/NextBot/Path/NextBotPathFollow.cpp',
+  'sdk/NextBot/Path/NextBotPath.cpp',
+  #'sdk/NextBot/Path/NextBotChasePath.cpp',
+  #'sdk/tf/player_vs_environment/monster_resource.cpp',
+  #'sdk/tf/halloween/halloween_base_boss.cpp',
+  #'sdk/tf/halloween/dracula/dracula.cpp',
+  #'sdk/tf/halloween/dracula/dracula_body.cpp',
+  #'sdk/tf/halloween/dracula/dracula_locomotion.cpp',
+  #'sdk/tf/halloween/dracula/dracula_behavior/dracula_behavior.cpp',
+  #'sdk/tf/halloween/dracula/dracula_behavior/dracula_emerge.cpp',
+  #'sdk/tf/halloween/dracula/dracula_bridge.cpp',
+]
+
+for sdk_name in MMS.sdks:
+  sdk = MMS.sdks[sdk_name]
+
+  for cxx in builder.targets:
+    if not cxx.target.arch in sdk.platformSpec[cxx.target.platform]:
+      continue
+    
+    binary = MMS.HL2ExtConfig(project, builder, cxx, 'servertools.' + sdk.ext, sdk)
+
+    binary.compiler.defines += ['NEXT_BOT']
+    binary.compiler.cxxincludes += [
+      builder.currentSourcePath,
+      os.path.join(builder.currentSourcePath, 'sdk', 'tf'),
+      os.path.join(builder.currentSourcePath, 'sdk', 'NextBot'),
+      os.path.join(sdk.path, 'game', 'server')]
+
+    if binary.compiler.behavior == 'gcc' or binary.compiler.behavior == 'clang':
+      binary.sources += ['linux/glibc_compact.cpp']
+
+    MMS.binaries += [binary]
+
+MMS.plugins = builder.Add(project)

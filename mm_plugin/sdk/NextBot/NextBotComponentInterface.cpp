@@ -1,0 +1,16 @@
+// NextBotComponentInterface.cpp
+// Implentation of system methods for NextBot component interface
+// Author: Michael Booth, May 2006
+//========= Copyright Valve Corporation, All rights reserved. ============//
+#include "NextBotInterface.h"
+#include "NextBotComponentInterface.h"
+
+INextBotComponent::INextBotComponent( INextBot *bot )
+{
+	m_curInterval = TICK_INTERVAL;
+	m_lastUpdateTime = 0;
+	m_bot = bot;
+	
+	// register this component with the bot
+	bot->RegisterComponent( this );
+}

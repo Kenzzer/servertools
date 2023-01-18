@@ -1,0 +1,5 @@
+"Metamod Plugin"
+{
+	"alias"		"servertools"
+	"file"		"addons/servertools/servertools.2.tf2.so"
+}

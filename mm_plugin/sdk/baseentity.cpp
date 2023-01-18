@@ -1,0 +1,887 @@
+#include "baseentity.hpp"
+#include "baseanimating.hpp"
+#include "interfaces.hpp"
+
+#include <shareddefs.h>
+#include <worldsize.h>
+#include <enginecallback.h>
+
+int CBaseEntity::offset_UpdateOnRemove = 0;
+int CBaseEntity::offset_GetDataDescMap = 0;
+int CBaseEntity::offset_MyNextBotPointer = 0;
+
+MCall<void, bool> CBaseEntity::CBaseEntity_Ctor;
+VCall<void, const char*> CBaseEntity::vPostConstructor;
+VCall<datamap_t*> CBaseEntity::vGetDataDescMap;
+VCall<void> CBaseEntity::vUpdateOnRemove;
+VCall<void> CBaseEntity::vSpawn;
+VCall<void> CBaseEntity::vPrecache;
+VCall<void, Vector*, Vector*, Vector*> CBaseEntity::vGetVectors;
+VCall<void, const Vector*, const QAngle*, const Vector*> CBaseEntity::vTeleport;
+VCall<void, char const*> CBaseEntity::vSetModel;
+VCall<Vector> CBaseEntity::vEyePosition;
+VCall<const QAngle&> CBaseEntity::vEyeAngles;
+VCall<CBaseCombatCharacter*> CBaseEntity::vMyCombatCharacterPointer;
+VCall<CBaseAnimating*> CBaseEntity::vGetBaseAnimating;
+VCall<INextBot*> CBaseEntity::vMyNextBotPointer;
+VCall<bool> CBaseEntity::vIsPlayer;
+MCall<void, int> CBaseEntity::mInvalidatePhysicsRecursive;
+VCall<const Vector&> CBaseEntity::vWorldSpaceCenter;
+VCall<int, const CTakeDamageInfo&> CBaseEntity::vOnTakeDamage;
+VCall<bool> CBaseEntity::vIsAlive;
+VCall<void, CBaseEntity*> CBaseEntity::vTouch;
+MCall<void> CBaseEntity::mCalcAbsolutePosition;
+MCall<void, CBaseEntity*> CBaseEntity::mSetGroundEntity;
+MCall<int, const CTakeDamageInfo&> CBaseEntity::mTakeDamage;
+
+INetworkStringTable* g_pStringTableParticleEffectNames = nullptr;
+
+#ifndef __linux__
+class IEntityListener;
+MCall<void, CBaseEntity*> SimThink_EntityChanged; // In reality CSimThinkManager::EntityChanged
+IEntityListener* g_pSimThinkManager = nullptr;
+CDetour* g_pSimThink_EntityChangedDetour = nullptr;
+DETOUR_DECL_MEMBER1(SimThink_EntityChanged, void, CBaseEntity*, ent)
+{
+	if (g_pSimThinkManager == nullptr)
+	{
+		g_pSimThinkManager = (IEntityListener*)this;
+	}
+	DETOUR_MEMBER_CALL(SimThink_EntityChanged)(ent);
+}
+#else
+FCall<void, CBaseEntity*> SimThink_EntityChanged;
+#endif
+
+FCall<const trace_t&> fGetTouchTrace;
+
+float k_flMaxEntityEulerAngle = 360.0 * 1000.0f;
+float k_flMaxEntityPosCoord = MAX_COORD_FLOAT;
+
+// Members
+DEFINEVAR(CBaseEntity, m_pfnThink);
+DEFINEVAR(CBaseEntity, m_iClassname);
+DEFINEVAR(CBaseEntity, m_nModelIndex);
+DEFINEVAR(CBaseEntity, m_iMaxHealth);
+DEFINEVAR(CBaseEntity, m_iHealth);
+DEFINEVAR(CBaseEntity, m_lifeState);
+DEFINEVAR(CBaseEntity, m_takedamage);
+DEFINEVAR(CBaseEntity, m_flSimulationTime);
+DEFINEVAR(CBaseEntity, m_nLastThinkTick);
+DEFINEVAR(CBaseEntity, m_nNextThinkTick);
+DEFINEVAR(CBaseEntity, m_aThinkFunctions);
+DEFINEVAR(CBaseEntity, m_spawnflags);
+DEFINEVAR(CBaseEntity, m_fFlags);
+DEFINEVAR(CBaseEntity, m_iEFlags);
+DEFINEVAR(CBaseEntity, m_iParentAttachment);
+DEFINEVAR(CBaseEntity, m_MoveType);
+DEFINEVAR(CBaseEntity, m_hMoveParent);
+DEFINEVAR(CBaseEntity, m_hMoveChild);
+DEFINEVAR(CBaseEntity, m_hMovePeer);
+DEFINEVAR(CBaseEntity, m_Collision);
+DEFINEVAR(CBaseEntity, m_CollisionGroup);
+DEFINEVAR(CBaseEntity, m_pPhysicsObject);
+DEFINEVAR(CBaseEntity, m_vecAbsOrigin);
+DEFINEVAR(CBaseEntity, m_angAbsRotation);
+DEFINEVAR(CBaseEntity, m_vecAbsVelocity);
+DEFINEVAR(CBaseEntity, m_vecOrigin);
+DEFINEVAR(CBaseEntity, m_angRotation);
+DEFINEVAR(CBaseEntity, m_vecVelocity);
+DEFINEVAR(CBaseEntity, m_rgflCoordinateFrame);
+DEFINEVAR(CBaseEntity, m_iTeamNum);
+DEFINEVAR(CBaseEntity, m_hGroundEntity);
+DEFINEVAR(CBaseEntity, m_ModelName);
+
+trace_t* g_pTouchTrace;
+
+bool CBaseEntity::Init(CGameConfig* config, char* error, size_t maxlength)
+{
+	try
+	{
+		CBaseEntity_Ctor.Init(config, "CBaseEntity::CBaseEntity");
+		mInvalidatePhysicsRecursive.Init(config, "CBaseEntity::InvalidatePhysicsRecursive");
+		mCalcAbsolutePosition.Init(config, "CBaseEntity::CalcAbsolutePosition");
+		mSetGroundEntity.Init(config, "CBaseEntity::SetGroundEntity");
+		vGetDataDescMap.Init(config, "CBaseEntity::GetDataDescMap");
+		vPostConstructor.Init(config, "CBaseEntity::PostConstructor");
+		vUpdateOnRemove.Init(config, "CBaseEntity::UpdateOnRemove");
+		vSpawn.Init(config, "CBaseEntity::Spawn");
+		vPrecache.Init(config, "CBaseEntity::Precache");
+		vGetVectors.Init(config, "CBaseEntity::GetVectors");
+		vTeleport.Init(config, "CBaseEntity::Teleport");
+		vSetModel.Init(config, "CBaseEntity::SetModel");
+		vMyCombatCharacterPointer.Init(config, "CBaseEntity::MyCombatCharacterPointer");
+		vGetBaseAnimating.Init(config, "CBaseEntity::GetBaseAnimating");
+		vMyNextBotPointer.Init(config, "CBaseEntity::MyNextBotPointer");
+		vIsPlayer.Init(config, "CBaseEntity::IsPlayer");
+		vWorldSpaceCenter.Init(config, "CBaseEntity::WorldSpaceCenter");
+		vEyePosition.Init(config, "CBaseEntity::EyePosition");
+		vEyeAngles.Init(config, "CBaseEntity::EyeAngles");
+		vOnTakeDamage.Init(config, "CBaseEntity::OnTakeDamage");
+		vIsAlive.Init(config, "CBaseEntity::IsAlive");
+		vTouch.Init(config, "CBaseEntity::Touch");
+		mTakeDamage.Init(config, "CBaseEntity::TakeDamage");
+
+		// This function also doesn't warrant its own file, as it only ever used by CBaseEntity
+		SimThink_EntityChanged.Init(config, "SimThink_EntityChanged");
+#ifndef __linux__
+		g_pSimThink_EntityChangedDetour = DETOUR_CREATE_MEMBER(SimThink_EntityChanged, "SimThink_EntityChanged")
+			g_pSimThink_EntityChangedDetour->EnableDetour();
+#endif
+	}
+	catch (const std::exception & e)
+	{
+		// Could use strncpy, but compiler complains
+		snprintf(error, maxlength, "%s", e.what());
+		return false;
+	}
+
+	CBaseEntity::offset_GetDataDescMap = config->GetOffset("CBaseEntity::GetDataDescMap");
+	if (CBaseEntity::offset_GetDataDescMap == -1)
+	{
+		snprintf(error, maxlength, "Couldn't find GetDataDescMap offset!");
+		return false;
+	}
+
+	CBaseEntity::offset_UpdateOnRemove = config->GetOffset("CBaseEntity::UpdateOnRemove");
+	if (CBaseEntity::offset_UpdateOnRemove == -1)
+	{
+		snprintf(error, maxlength, "Failed to retrieve CBaseEntity::UpdateOnRemove offset!");
+		return false;
+	}
+
+	CBaseEntity::offset_MyNextBotPointer = config->GetOffset("CBaseEntity::MyNextBotPointer");
+	if (CBaseEntity::offset_MyNextBotPointer == -1)
+	{
+		snprintf(error, maxlength, "Failed to retrieve CBaseEntity::MyNextBotPointer offset!");
+		return false;
+	}
+
+	uint8_t* addr = (uint8_t*)config->GetMemSig("CBaseEntity::PhysicsMarkEntitiesAsTouching");
+	if (addr)
+	{
+		int offset = config->GetOffset("g_TouchTrace");
+		if (offset == -1)
+		{
+			snprintf(error, maxlength, "Couldn't find offset for g_TouchTrace ptr!");
+			return false;
+		}
+		
+		g_pTouchTrace = *reinterpret_cast<trace_t**>(addr + offset);
+	}
+	else
+	{
+		snprintf(error, maxlength, "Failed to retrieve g_TouchTrace!");
+		return false;
+	}
+
+	g_pStringTableParticleEffectNames = netstringtables->FindTable("ParticleEffectNames");
+	if (!g_pStringTableParticleEffectNames)
+	{
+		snprintf(error, maxlength, "Couldn't find ParticleEffectNames string table!");
+		return false;
+	}
+
+	// Any entity that inherits CBaseEntity is good
+	BEGIN_VAR("trigger_stun");
+	OFFSETVAR_DATA(CBaseEntity, m_pfnThink);
+	OFFSETVAR_DATA(CBaseEntity, m_iClassname);
+	OFFSETVAR_DATA(CBaseEntity, m_nModelIndex);
+	OFFSETVAR_DATA(CBaseEntity, m_iMaxHealth);
+	OFFSETVAR_DATA(CBaseEntity, m_iHealth);
+	OFFSETVAR_DATA(CBaseEntity, m_lifeState);
+	OFFSETVAR_DATA(CBaseEntity, m_takedamage);
+	OFFSETVAR_SEND(CBaseEntity, m_flSimulationTime);
+	OFFSETVAR_DATA(CBaseEntity, m_nLastThinkTick);
+	OFFSETVAR_DATA(CBaseEntity, m_nNextThinkTick);
+	OFFSETVAR_DATA(CBaseEntity, m_aThinkFunctions);
+	OFFSETVAR_DATA(CBaseEntity, m_spawnflags);
+	OFFSETVAR_DATA(CBaseEntity, m_fFlags);
+	OFFSETVAR_DATA(CBaseEntity, m_iEFlags);
+	OFFSETVAR_SEND(CBaseEntity, m_iParentAttachment);
+	OFFSETVAR_DATA(CBaseEntity, m_MoveType);
+	OFFSETVAR_DATA(CBaseEntity, m_hMoveParent);
+	OFFSETVAR_DATA(CBaseEntity, m_hMoveChild);
+	OFFSETVAR_DATA(CBaseEntity, m_hMovePeer);
+	VAR_OFFSET_SET(m_Collision, VAR_OFFSET(m_hMovePeer) + sizeof(EHANDLE));
+	OFFSETVAR_SEND(CBaseEntity, m_CollisionGroup);
+	VAR_OFFSET_SET(m_pPhysicsObject, VAR_OFFSET(m_CollisionGroup) + sizeof(int));
+	OFFSETVAR_DATA(CBaseEntity, m_vecAbsOrigin);
+	OFFSETVAR_DATA(CBaseEntity, m_angAbsRotation);
+	OFFSETVAR_DATA(CBaseEntity, m_vecAbsVelocity);
+	OFFSETVAR_SEND(CBaseEntity, m_vecOrigin);
+	OFFSETVAR_SEND(CBaseEntity, m_angRotation);
+	OFFSETVAR_DATA(CBaseEntity, m_vecVelocity);
+	OFFSETVAR_DATA(CBaseEntity, m_rgflCoordinateFrame);
+	OFFSETVAR_SEND(CBaseEntity, m_iTeamNum);
+	OFFSETVAR_DATA(CBaseEntity, m_hGroundEntity);
+	OFFSETVAR_DATA(CBaseEntity, m_ModelName);
+	END_VAR;
+
+#ifndef __linux__
+	if (g_pSimThinkManager == nullptr)
+	{
+		snprintf(error, maxlength, "Failed to retrieve CSimThinkManager - g_SimThinkManager!");
+		return false;
+	}
+#endif
+
+	return true;
+}
+
+static bool g_bIsPrecacheAllowed = true;
+
+bool CBaseEntity::IsPrecacheAllowed()
+{
+	return g_bIsPrecacheAllowed;
+}
+
+void CBaseEntity::SetAllowPrecache(bool v)
+{
+	g_bIsPrecacheAllowed = v;
+}
+
+int	CBaseEntity::PrecacheModel(const char *name, bool bPreload)
+{
+	if (!name || !*name)
+	{
+		return -1;
+	}
+
+	// Warn on out of order precache
+	if (!CBaseEntity::IsPrecacheAllowed())
+	{
+		if (!engine->IsModelPrecached(name))
+		{
+			DevMsg( "Late precache of %s -- not necessarily a bug now that we allow ~everything to be dynamically loaded.\n", name );
+		}
+	}
+
+	int idx = engine->PrecacheModel(name, bPreload);
+	if (idx != -1)
+	{
+		//PrecacheModelComponents( idx );
+	}
+
+	return idx;
+}
+
+bool CBaseEntity::PrecacheScriptSound(const char* soundname)
+{
+	int soundIndex = soundemitterbase->GetSoundIndex(soundname);
+	if (!soundemitterbase->IsValidIndex(soundIndex))
+	{
+		return false;
+	}
+
+	CSoundParametersInternal *internal = soundemitterbase->InternalGetParametersForSound(soundIndex);
+
+	if (!internal)
+	{
+		return false;
+	}
+
+	int waveCount = internal->NumSoundNames();
+
+	if (!waveCount)
+	{
+		return false;
+	}
+
+	for (int wave = 0; wave < waveCount; wave++)
+	{
+		const char* waveName = soundemitterbase->GetWaveName(internal->GetSoundNames()[wave].symbol);
+		engsound->PrecacheSound(waveName);
+	}
+
+	return true;
+}
+
+void PrecacheParticleSystem(const char* name)
+{
+	g_pStringTableParticleEffectNames->AddString(true, name);
+}
+
+datamap_t* CBaseEntity::GetDataDescMap(void)
+{
+	return vGetDataDescMap(this);
+}
+
+const trace_t& CBaseEntity::GetTouchTrace(void)
+{
+	return *g_pTouchTrace;
+}
+
+void CBaseEntity::DispatchUpdateTransmitState(void)
+{
+	// Admittedly a far fetched hack BUT IServerEntity::SetModelIndex is only implemented
+	// by CBaseEntity - https://github.com/alliedmodders/hl2sdk/blob/0ef5d3d482157bc0bb3aafd37c08961373f87bfd/game/server/baseentity.cpp#L621
+	// If the given model index is equal to m_nModelIndex, then only CBaseEntity::DispatchUpdateTransmitState()
+	// will be called. Which is what we want here!
+	// Hopefully we will never need the return value! Although we could probably read the assembly register
+
+	// To-do? : There's potentially an assertion to avoid - if this ever happens we need to set
+	// m_bDynamicModelAllowed on true when m_nModelIndex is < -1 and m_bDynamicModelAllowed false
+	// then reset it. m_bDynamicModelAllowed can be located right after the netprop/datamap m_vecViewOffset
+	this->SetModelIndex(*m_nModelIndex());
+}
+
+void CBaseEntity::InvalidatePhysicsRecursive(int nChangeFlags)
+{
+	mInvalidatePhysicsRecursive(this, nChangeFlags);
+}
+
+void CBaseEntity::SetGroundEntity(CBaseEntity* ground)
+{
+	mSetGroundEntity(this, ground);
+}
+
+void CBaseEntity::Touch(CBaseEntity* ent)
+{
+	vTouch(this, ent);
+}
+
+int CBaseEntity::TakeDamage(const CTakeDamageInfo& info)
+{
+	return mTakeDamage(this, info);
+}
+
+void CBaseEntity::PostConstructor(const char* name)
+{
+	vPostConstructor(this, name);
+}
+
+void CBaseEntity::UpdateOnRemove(void)
+{
+	vUpdateOnRemove(this);
+}
+
+void CBaseEntity::Spawn(void)
+{
+	vSpawn(this);
+}
+
+void CBaseEntity::Precache(void)
+{
+	vPrecache(this);
+}
+
+void CBaseEntity::GetVectors(Vector* v1, Vector* v2, Vector* v3)
+{
+	vGetVectors(this, v1, v2, v3);
+}
+
+void CBaseEntity::Teleport(const Vector* v1, const QAngle* v2, const Vector* v3)
+{
+	vTeleport(this, v1, v2, v3);
+}
+
+void CBaseEntity::SetModel(char const* mdl)
+{
+	vSetModel(this, mdl);
+}
+
+CBaseCombatCharacter* CBaseEntity::MyCombatCharacterPointer(void)
+{
+	return vMyCombatCharacterPointer(this);
+}
+
+CBaseAnimating* CBaseEntity::GetBaseAnimating(void)
+{
+	return vGetBaseAnimating(this);
+}
+
+INextBot* CBaseEntity::MyNextBotPointer(void)
+{
+	return vMyNextBotPointer(this);
+}
+
+bool CBaseEntity::IsPlayer(void)
+{
+	return vIsPlayer(this);
+}
+
+const Vector& CBaseEntity::WorldSpaceCenter(void)
+{
+	return vWorldSpaceCenter(this);
+}
+
+int CBaseEntity::OnTakeDamage(const CTakeDamageInfo& info)
+{
+	return vOnTakeDamage(this, info);
+}
+
+bool CBaseEntity::IsAlive()
+{
+	return vIsAlive(this);
+}
+
+Vector CBaseEntity::EyePosition(void)
+{
+	return vEyePosition(this);
+}
+
+const QAngle& CBaseEntity::EyeAngles(void)
+{
+	return vEyeAngles(this);
+}
+
+void CBaseEntity::CalcAbsolutePosition(void)
+{
+	mCalcAbsolutePosition(this);
+}
+
+void CBaseEntity::CalcAbsoluteVelocity(void)
+{
+	if (!IsEFlagSet(EFL_DIRTY_ABSVELOCITY))
+	{
+		return;
+	}
+
+	RemoveEFlags(EFL_DIRTY_ABSVELOCITY);
+
+	CBaseEntity* pMoveParent = GetMoveParent();
+	if (!pMoveParent)
+	{
+		*m_vecAbsVelocity() = *m_vecVelocity();
+		return;
+	}
+
+	// This transforms the local velocity into world space
+	Vector out;
+	VectorRotate(*m_vecVelocity(), pMoveParent->EntityToWorldTransform(), out);
+	// Now add in the parent abs velocity
+	out += pMoveParent->GetAbsVelocity();
+
+	*m_vecAbsVelocity() = out;
+}
+
+void CBaseEntity::SetAbsOrigin(const Vector& absOrigin)
+{
+	AssertMsg(absOrigin.IsValid(), "Invalid origin set");
+
+	// This is necessary to get the other fields of m_rgflCoordinateFrame ok
+	CalcAbsolutePosition();
+
+	if (*m_vecAbsOrigin() == absOrigin)
+	{
+		return;
+	}
+
+	// All children are invalid, but we are not
+	InvalidatePhysicsRecursive(POSITION_CHANGED);
+	RemoveEFlags(EFL_DIRTY_ABSTRANSFORM);
+
+	*m_vecAbsOrigin() = absOrigin;
+
+	MatrixSetColumn(absOrigin, 3, *m_rgflCoordinateFrame());
+
+	Vector vecNewOrigin;
+	CBaseEntity* pMoveParent = GetMoveParent();
+	if (!pMoveParent)
+	{
+		vecNewOrigin = absOrigin;
+	}
+	else
+	{
+		matrix3x4_t tempMat;
+		matrix3x4_t& parentTransform = GetParentToWorldTransform(tempMat);
+
+		// Moveparent case: transform the abs position into local space
+		VectorITransform(absOrigin, parentTransform, vecNewOrigin);
+	}
+
+	if (*m_vecOrigin() != vecNewOrigin)
+	{
+		NETWORKVAR_UPDATE(m_vecOrigin, vecNewOrigin);
+		SetSimulationTime(gpGlobals->curtime);
+	}
+}
+
+void CBaseEntity::SetAbsAngles(const QAngle& absAngles)
+{
+	// This is necessary to get the other fields of m_rgflCoordinateFrame ok
+	CalcAbsolutePosition();
+
+	// FIXME: The normalize caused problems in server code like momentary_rot_button that isn't
+	//        handling things like +/-180 degrees properly. This should be revisited.
+	//QAngle angleNormalize( AngleNormalize( absAngles.x ), AngleNormalize( absAngles.y ), AngleNormalize( absAngles.z ) );
+
+	if (*m_angAbsRotation() == absAngles)
+	{
+		return;
+	}
+
+	// All children are invalid, but we are not
+	InvalidatePhysicsRecursive(ANGLES_CHANGED);
+	RemoveEFlags(EFL_DIRTY_ABSTRANSFORM);
+
+	*m_angAbsRotation() = absAngles;
+	AngleMatrix(absAngles, *m_rgflCoordinateFrame());
+	auto m = *m_vecAbsOrigin();
+	MatrixSetColumn(m, 3, *m_rgflCoordinateFrame());
+	*m_vecAbsOrigin() = m;
+
+	QAngle angNewRotation;
+	CBaseEntity* pMoveParent = GetMoveParent();
+	if (!pMoveParent)
+	{
+		angNewRotation = absAngles;
+	}
+	else
+	{
+		if (absAngles == pMoveParent->GetAbsAngles())
+		{
+			angNewRotation.Init();
+		}
+		else
+		{
+			// Moveparent case: transform the abs transform into local space
+			matrix3x4_t worldToParent, localMatrix;
+			MatrixInvert(pMoveParent->EntityToWorldTransform(), worldToParent);
+			ConcatTransforms(worldToParent, *m_rgflCoordinateFrame(), localMatrix);
+			MatrixAngles(localMatrix, angNewRotation);
+		}
+	}
+
+	if (*m_angRotation() != angNewRotation)
+	{
+		NETWORKVAR_UPDATE(m_angRotation, angNewRotation);
+		SetSimulationTime(gpGlobals->curtime);
+	}
+}
+
+void CBaseEntity::SetAbsVelocity(const Vector& vecAbsVelocity)
+{
+	if (*m_vecAbsVelocity() == vecAbsVelocity)
+	{
+		return;
+	}
+
+	// The abs velocity won't be dirty since we're setting it here
+	// All children are invalid, but we are not
+	InvalidatePhysicsRecursive(VELOCITY_CHANGED);
+	RemoveEFlags(EFL_DIRTY_ABSVELOCITY);
+
+	*m_vecAbsVelocity() = vecAbsVelocity;
+
+	// NOTE: Do *not* do a network state change in this case.
+	// m_vecVelocity is only networked for the player, which is not manual mode
+	CBaseEntity* pMoveParent = GetMoveParent();
+	if (!pMoveParent)
+	{
+		NETWORKVAR_UPDATE(m_vecVelocity, vecAbsVelocity)
+		return;
+	}
+
+	// First subtract out the parent's abs velocity to get a relative
+	// velocity measured in world space
+	Vector relVelocity;
+	VectorSubtract(vecAbsVelocity, pMoveParent->GetAbsVelocity(), relVelocity);
+
+	// Transform relative velocity into parent space
+	Vector vNew;
+	VectorIRotate(relVelocity, pMoveParent->EntityToWorldTransform(), vNew);
+	NETWORKVAR_UPDATE(m_vecVelocity, vNew);
+}
+
+matrix3x4_t& CBaseEntity::GetParentToWorldTransform(matrix3x4_t& tempMatrix)
+{
+	CBaseEntity* pMoveParent = GetMoveParent();
+	if (!pMoveParent)
+	{
+		SetIdentityMatrix(tempMatrix);
+		return tempMatrix;
+	}
+
+	auto attach = *m_iParentAttachment();
+	if (attach != 0)
+	{
+		MDLCACHE_CRITICAL_SECTION();
+
+		CBaseAnimating* pAnimating = pMoveParent->GetBaseAnimating();
+		if (pAnimating && pAnimating->GetAttachment(attach, tempMatrix))
+		{
+			return tempMatrix;
+		}
+	}
+	// If we fall through to here, then just use the move parent's abs origin and angles.
+	return pMoveParent->EntityToWorldTransform();
+}
+
+int	CBaseEntity::GetIndexForThinkContext(const char* pszContext)
+{
+	CUtlVector<thinkfunc_t>* funcs = m_aThinkFunctions();
+	for (int i = 0; i < funcs->Size(); i++)
+	{
+		if (!Q_strncmp(STRING(funcs->Element(i).m_iszContext), pszContext, MAX_CONTEXT_LENGTH))
+		{
+			return i;
+		}
+	}
+	return NO_THINK_CONTEXT;
+}
+
+int CBaseEntity::RegisterThinkContext(const char* szContext)
+{
+	int iIndex = GetIndexForThinkContext(szContext);
+	if (iIndex != NO_THINK_CONTEXT)
+	{
+		return iIndex;
+	}
+
+	// Make a new think func
+	thinkfunc_t sNewFunc;
+	Q_memset(&sNewFunc, 0, sizeof(sNewFunc));
+	sNewFunc.m_pfnThink = nullptr;
+	sNewFunc.m_nNextThinkTick = 0;
+	sNewFunc.m_iszContext = AllocPooledString(szContext);
+
+	// Insert it into our list
+	return m_aThinkFunctions()->AddToTail(sNewFunc);
+}
+
+HBASEPTR CBaseEntity::ThinkSet(HBASEPTR func, float thinkTime, const char* szContext)
+{
+	// Old system?
+	if (!szContext)
+	{
+		union
+		{
+			HBASEPTR mfpnew;
+#ifndef __linux__
+			struct
+			{
+				void* addr;
+			} s;
+		} u;
+		u.mfpnew = func;
+#else
+			struct
+			{
+				void* addr;
+				intptr_t adjustor;
+			} s;
+		} u;
+		u.mfpnew = func;
+#endif
+		memcpy((((uint8_t*)this) + CBaseEntity::offset_m_pfnThink), &u, sizeof(u.s));
+		return func;
+	}
+
+	// Find the think function in our list, and if we couldn't find it, register it
+	int iIndex = GetIndexForThinkContext(szContext);
+	if (iIndex == NO_THINK_CONTEXT)
+	{
+		iIndex = RegisterThinkContext(szContext);
+	}
+
+	CUtlVector<thinkfunc_t>* funcs = m_aThinkFunctions();
+	funcs->Element(iIndex).m_pfnThink = func;
+	if (thinkTime != 0)
+	{
+		int thinkTick = (thinkTime == TICK_NEVER_THINK) ? TICK_NEVER_THINK : TIME_TO_TICKS(thinkTime);
+		funcs->Element(iIndex).m_nNextThinkTick = thinkTick;
+		CheckHasThinkFunction(thinkTick == TICK_NEVER_THINK ? false : true);
+	}
+	return func;
+}
+
+void CBaseEntity::SetNextThink(float thinkTime, const char* szContext)
+{
+	int thinkTick = (thinkTime == TICK_NEVER_THINK) ? TICK_NEVER_THINK : TIME_TO_TICKS(thinkTime);
+
+	// Are we currently in a think function with a context?
+	int iIndex = 0;
+	if (!szContext)
+	{
+		// Old system
+		NETWORKVAR_UPDATE(m_nNextThinkTick, thinkTick);
+		CheckHasThinkFunction(thinkTick == TICK_NEVER_THINK ? false : true);
+		return;
+	}
+	else
+	{
+		// Find the think function in our list, and if we couldn't find it, register it
+		iIndex = GetIndexForThinkContext(szContext);
+		if (iIndex == NO_THINK_CONTEXT)
+		{
+			iIndex = RegisterThinkContext(szContext);
+		}
+	}
+
+	// Old system
+	m_aThinkFunctions()->Element(iIndex).m_nNextThinkTick = thinkTick;
+	CheckHasThinkFunction(thinkTick == TICK_NEVER_THINK ? false : true);
+}
+
+float CBaseEntity::GetNextThink(const char* szContext)
+{
+	// Are we currently in a think function with a context?
+	int iIndex = 0;
+	if (!szContext)
+	{
+		int nextThink = *(m_nNextThinkTick());
+		if (nextThink == TICK_NEVER_THINK)
+		{
+			return TICK_NEVER_THINK;
+		}
+
+		// Old system
+		return TICK_INTERVAL * (nextThink);
+	}
+	else
+	{
+		// Find the think function in our list
+		iIndex = GetIndexForThinkContext(szContext);
+	}
+
+	CUtlVector<thinkfunc_t>* funcs = m_aThinkFunctions();
+	if (iIndex == funcs->InvalidIndex())
+	{
+		return TICK_NEVER_THINK;
+	}
+
+	if (funcs->Element(iIndex).m_nNextThinkTick == TICK_NEVER_THINK)
+	{
+		return TICK_NEVER_THINK;
+	}
+	return TICK_INTERVAL * (funcs->Element(iIndex).m_nNextThinkTick);
+}
+
+int	CBaseEntity::GetNextThinkTick(const char* szContext)
+{
+	// Are we currently in a think function with a context?
+	int iIndex = 0;
+	if (!szContext)
+	{
+		int nextThink = *(m_nNextThinkTick());
+		if (nextThink == TICK_NEVER_THINK)
+		{
+			return TICK_NEVER_THINK;
+		}
+		// Old system
+		return nextThink;
+	}
+	else
+	{
+		// Find the think function in our list
+		iIndex = GetIndexForThinkContext(szContext);
+
+		// Looking up an invalid think context!
+		Assert(iIndex != -1);
+	}
+
+	CUtlVector<thinkfunc_t>* funcs = m_aThinkFunctions();
+	if ((iIndex == -1) || (funcs->Element(iIndex).m_nNextThinkTick == TICK_NEVER_THINK))
+	{
+		return TICK_NEVER_THINK;
+	}
+
+	return funcs->Element(iIndex).m_nNextThinkTick;
+}
+
+float CBaseEntity::GetLastThink(const char* szContext)
+{
+	// Are we currently in a think function with a context?
+	int iIndex = 0;
+	if (!szContext)
+	{
+		// Old system
+		return *(m_nLastThinkTick()) * TICK_INTERVAL;
+	}
+	else
+	{
+		// Find the think function in our list
+		iIndex = GetIndexForThinkContext(szContext);
+	}
+
+	return m_aThinkFunctions()->Element(iIndex).m_nLastThinkTick * TICK_INTERVAL;
+}
+
+int CBaseEntity::GetLastThinkTick(const char* szContext)
+{
+	// Are we currently in a think function with a context?
+	int iIndex = 0;
+	if (!szContext)
+	{
+		// Old system
+		return *m_nLastThinkTick();
+	}
+	else
+	{
+		// Find the think function in our list
+		iIndex = GetIndexForThinkContext(szContext);
+	}
+
+	return m_aThinkFunctions()->Element(iIndex).m_nLastThinkTick;
+}
+
+bool CBaseEntity::WillThink(void)
+{
+	if (*m_nNextThinkTick() > 0)
+	{
+		return true;
+	}
+
+	CUtlVector<thinkfunc_t>* funcs = m_aThinkFunctions();
+	for (int i = 0; i < funcs->Count(); i++)
+	{
+		if (funcs->Element(i).m_nNextThinkTick > 0)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void CBaseEntity::CheckHasThinkFunction(bool isThinking)
+{
+	if (IsEFlagSet(EFL_NO_THINK_FUNCTION) && isThinking)
+	{
+		RemoveEFlags(EFL_NO_THINK_FUNCTION);
+	}
+	else if (!isThinking && !IsEFlagSet(EFL_NO_THINK_FUNCTION) && !WillThink())
+	{
+		AddEFlags(EFL_NO_THINK_FUNCTION);
+	}
+#ifndef __linux__
+	SimThink_EntityChanged(g_pSimThinkManager, this);
+#else
+	SimThink_EntityChanged(this);
+#endif
+}
+
+void CBaseEntity::SetLocalOrigin(const Vector& origin)
+{
+	if (!IsEntityPositionReasonable(origin))
+	{
+		return;
+	}
+
+	Vector* entOrigin = m_vecOrigin();
+	if (*entOrigin != origin)
+	{
+		NETWORKVAR_UPDATE(m_vecOrigin, origin);
+		InvalidatePhysicsRecursive(POSITION_CHANGED);
+		SetSimulationTime(gpGlobals->curtime);
+	}
+}
+
+
+void CBaseEntity::SetLocalAngles(const QAngle& angles)
+{
+	if (!IsEntityQAngleReasonable(angles))
+	{
+		return;
+	}
+
+	QAngle* ang = m_angRotation();
+	if (*ang != angles)
+	{
+		NETWORKVAR_UPDATE(m_angRotation, angles);
+		InvalidatePhysicsRecursive(ANGLES_CHANGED);
+		SetSimulationTime(gpGlobals->curtime);
+	}
+}

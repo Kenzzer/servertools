@@ -1,0 +1,404 @@
+"Games"
+{
+	"tf"
+	{
+		"Offsets"
+		{
+			// Locate vtable CNavMesh::CreateArea call, first dword is TheNavMesh second is TheNavAreas
+			"TheNavMesh"
+			{
+				"linux"		"979"
+				"windows"	"786"
+			}
+			"TheNavAreas"
+			{
+				"linux"		"1058"
+				"windows"	"819"
+			}
+			// Locate CBaseEntity::PhysicsMarkEntitiesAsTouching, first dword is g_TouchTrace
+			"g_TouchTrace"
+			{
+				"linux"		"29"
+				"windows"	"32"
+			}
+			"g_EntityListPool"
+			{
+				"windows"	"17"
+			}
+			"CNavMesh::m_isLoaded"
+			{
+				"linux"		"52"
+				"windows"	"52"
+			}
+			"CBaseEntity::GetDataDescMap"
+			{
+				"linux"		"12"
+				"windows"	"11"
+			}
+			"CBaseEntity::Spawn"
+			{
+				"linux"		"23"
+				"windows"	"22"
+			}
+			"CBaseEntity::Precache"
+			{
+				"linux"		"24"
+				"windows"	"23"
+			}
+			"CBaseEntity::SetModel"
+			{
+				"linux"		"25"
+				"windows"	"24"
+			}
+			"CBaseEntity::PostConstructor"
+			{
+				"linux"		"27"
+				"windows"	"26"
+			}
+			"CBaseEntity::GetBaseAnimating"
+			{
+				"linux"		"51"
+				"windows"	"50"
+			}
+			"CBaseEntity::OnTakeDamage"
+			{
+				"linux"		"63"
+				"windows"	"62"
+			}
+			"CBaseEntity::IsAlive"
+			{
+				"linux"		"66"
+				"windows"	"65"
+			}
+			"CBaseEntity::Event_Killed"
+			{
+				"linux"		"67"
+				"windows"	"66"
+			}
+			"CBaseEntity::MyCombatCharacterPointer"
+			{
+				"linux"		"72"
+				"windows"	"71"
+			}
+			"CBaseEntity::MyNextBotPointer"
+			{
+				"linux"		"73"
+				"windows"	"72"
+			}
+			"CBaseEntity::IsPlayer"
+			{
+				"linux"		"81"
+				"windows"	"80"
+			}
+			"CBaseEntity::Touch"
+			{
+				"linux"		"103"
+				"windows"	"102"
+			}
+			"CBaseEntity::PhysicsSimulate"
+			{
+				"linux"		"108"
+				"windows"	"107"
+			}
+			"CBaseEntity::UpdateOnRemove"
+			{
+				"linux"		"109"
+				"windows"	"108"
+			}
+			"CBaseEntity::Teleport"
+			{
+				"linux"		"112"
+				"windows"	"111"
+			}
+			"CBaseEntity::EyePosition"
+			{
+				"linux"		"134"
+				"windows"	"133"
+			}
+			"CBaseEntity::EyeAngles"
+			{
+				"linux"		"135"
+				"windows"	"134"
+			}
+			"CBaseEntity::GetVectors"
+			{
+				"linux"		"140"
+				"windows"	"139"
+			}
+			"CBaseEntity::WorldSpaceCenter"		
+			{
+				"linux"		"153"
+				"windows"	"152"
+			}
+			"CBaseAnimating::StudioFrameAdvance"
+			{
+				"linux"		"198"
+				"windows"	"197"
+			}
+			"CBaseAnimating::DispatchAnimEvents"
+			{
+				"linux"		"210"
+				"windows"	"209"
+			}
+			"CBaseAnimating::HandleAnimEvent"
+			{
+				"linux"		"211"
+				"windows"	"210"
+			}
+			"CBaseAnimating::GetAttachment"
+			{
+				"linux"		"213"
+				"windows"	"212"
+			}
+			"CBaseCombatCharacter::IsHiddenByFog[Vector]"
+			{
+				"linux"		"248"
+				"windows"	"249"
+			}
+			"CBaseCombatCharacter::IsHiddenByFog[CBaseEntity]"
+			{
+				"linux"		"249"
+				"windows"	"248"
+			}
+			"CBaseCombatCharacter::IsHiddenByFog[float]"
+			{
+				"linux"		"250"
+				"windows"	"247"
+			}
+			"CBaseCombatCharacter::Weapon_Equip"
+			{
+				"linux"		"269"
+				"windows"	"268"
+			}
+			"CBaseCombatCharacter::Weapon_Drop"
+			{
+				"linux"		"271"
+				"windows"	"270"
+			}
+			"CBaseCombatCharacter::OnTakeDamage_Alive"
+			{
+				"linux"		"280"
+				"windows"	"279"
+			}
+			"CBaseCombatCharacter::OnTakeDamage_Dying"
+			{
+				"linux"		"281"
+				"windows"	"280"
+			}
+			"CBaseCombatCharacter::GetLastKnownArea"
+			{
+				"linux"		"320"
+				"windows"	"319"
+			}
+			"CBaseCombatCharacter::OnNavAreaChanged"
+			{
+				"linux"		"324"
+				"windows"	"323"
+			}
+			"CBaseCombatCharacter::UpdateLastKnownArea"
+			{
+				"linux"		"323"
+				"windows"	"322"
+			}
+			"CHalloweenBaseBoss::GetBossType"
+			{
+				"linux"		"327"
+				"windows"	"325"
+			}
+			"CHalloweenBaseBoss::vtable_entries"
+			{
+				"linux"		"338"
+				"windows"	"333"
+			}
+			"INextBot::vtable_entries"
+			{
+				"linux"		"80"
+				"windows"	"79"
+			}
+			"CSendPropExtra_UtlVector::m_Offset"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
+		}
+		"Signatures"
+		{
+			"TheNextBots"
+			{
+				"library"		"server"
+				"windows"		"\xA1\x2A\x2A\x2A\x2A\x85\xC0\x75\x2A\x8B\x0D\x2A\x2A\x2A\x2A\xF6\xC1\x01"
+				"linux"			"@_Z11TheNextBotsv"
+			}
+			"CTFGameRules::ApplyOnDamageModifyRules"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x81\xEC\xAC\x00\x00\x00\x56\x8B\x75\x0C"
+				"linux"			"@_ZN12CTFGameRules24ApplyOnDamageModifyRulesER15CTakeDamageInfoP11CBaseEntityb"
+			}
+			"CTFGameRules::ApplyOnDamageAliveModifyRules"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x81\xEC\x2A\x00\x00\x00\x53\x8B\x5D\x0C\x89\x2A\x2A\x56"
+				"linux"			"@_ZN12CTFGameRules29ApplyOnDamageAliveModifyRulesERK15CTakeDamageInfoP11CBaseEntityRNS_20DamageModifyExtras_tE"
+			}
+			// Find string "Invalid navigation file.\n"
+			"CNavMesh::Load"
+			{
+				"library"		"server"
+				"linux"			"@_ZN8CNavMesh4LoadEv"
+				"windows"		"\x55\x8B\xEC\x81\xEC\x84\x01\x00\x00\x53\x56\x8B\x35\x2A\x2A\x2A\x2A" 
+			}
+			"CNavMesh::GetGroundHeight"
+			{
+				"library"		"server"
+				"windows"		"\x53\x8B\xDC\x83\xEC\x08\x83\xE4\xF0\x83\xC4\x04\x55\x8B\x6B\x04\x89\x6C\x24\x04\x8B\xEC\x81\xEC\xFC\x00\x00\x00\x56\x6A\x00\x6A\x00\x6A\x00\x8D"
+				"linux"			"@_ZNK8CNavMesh15GetGroundHeightERK6VectorPfPS0_"
+			}
+			"CTraceFilterSimple::ShouldHitEntity"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x53\x8B\x5D\x0C\x56\x8B\x75\x08\x57\x53\x56"
+				"linux"			"@_ZN18CTraceFilterSimple15ShouldHitEntityEP13IHandleEntityi"
+			}
+			"GetAnimationEvent"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x53\x56\x8B\x75\x08\x85\xF6\x0F\x84\x2A\x2A\x2A\x2A\x8B\xCE\xE8\x2A\x2A\x2A\x2A"
+				"linux"			"@_Z17GetAnimationEventP10CStudioHdriP11animevent_tffi"
+			}
+			"Studio_LookupSequence"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x56\x8B\x75\x08\x85\xF6\x75\x2A\x33\xC0\x5E\x5D\xC3\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x84\xC0\x74\x2A\x53"
+				"linux"			"@_Z14LookupSequenceP10CStudioHdrPKc"
+			}
+			"Studio_SelectWeightedSequence"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x56\x8B\x75\x08\x85\xF6\x75\x2A\x33\xC0\x5E\x5D\xC3\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x84\xC0\x74\x2A\x8B\xCE"
+				"linux"			"@_Z22SelectWeightedSequenceP10CStudioHdrii"
+			}
+			"Studio_FindAttachment"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x53\x56\x57\x8B\x7D\x08\x85\xFF"
+				"linux"			"@_Z21Studio_FindAttachmentPK10CStudioHdrPKc"
+			}
+			"SimThink_EntityChanged"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x53\x57\x8B\x7D\x08\x8B\xD9\xF6\x87\x14\x01\x00\x00\x01"
+				"linux"			"@_Z22SimThink_EntityChangedP11CBaseEntity"
+			}
+			// Find ".?AVCRallyPoint@@" to get to CRallyPoint's type descriptor -> complete object locator -> vtable
+			// goto xref to vtable to enter CRallyPoint's constructor
+			// CBaseEntity constructor is second call that takes additional argument (bServerOnly set to 0)
+			"CBaseEntity::CBaseEntity"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x83\xEC\x14\x53\x56\x8B\xF1\x57\x8D\x2A\x2A\xC7\x06"
+				"linux"			"@_ZN11CBaseEntityC1Eb"
+			}
+			// Find "add 0x%p: %s-%s (%d-%d) [%d in play, %d max]\n" to find CBaseEntity::PhysicsMarkEntityAsTouched
+			// jump to the function calling this one, there can be only one and it's CBaseEntity::PhysicsMarkEntitiesAsTouching
+			"CBaseEntity::PhysicsMarkEntitiesAsTouching"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x56\x8B\x75\x0C\x57\x8B\xF9\xB9\x2A\x2A\x2A\x2A\x56\xE8\x2A\x2A\x2A\x2A\xF3\x0F\x10\x46\x38\x8B\xCF\xF3\x0F\x11\x05\x2A\x2A\x2A\x2A\x8B\x46\x3C\xA3\x2A\x2A\x2A\x2A\x8B\x46\x40\xA3\x2A\x2A\x2A\x2A\x8B\x46\x44\xA3\x2A\x2A\x2A\x2A\x66\x8B\x46\x48\x66\xA3\x2A\x2A\x2A\x2A\x8B\x46\x4C\xA3\x2A\x2A\x2A\x2A\x8B\x46\x50\x8B\x75\x08\x56\xA3\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A"
+				"linux"			"@_ZN11CBaseEntity29PhysicsMarkEntitiesAsTouchingEPS_R10CGameTrace"
+			}
+			// Find "CBaseEntity::TakeDamage" string
+			"CBaseEntity::TakeDamage"
+			{
+				"library"		"server"
+				"windows"		""
+				"linux"			"@_ZN11CBaseEntity10TakeDamageERK15CTakeDamageInfo"
+			}
+			"CBaseEntity::CalcAbsolutePosition"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x81\xEC\x80\x00\x00\x00\x56\x8B\xF1\x8B\x86\x14\x01\x00\x00"
+				"linux"			"@_ZN11CBaseEntity20CalcAbsolutePositionEv"
+			}
+			"CBaseEntity::InvalidatePhysicsRecursive"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x53\x8B\x5D\x08\x56\x8B\xF3\x83\xE6\x04"
+				"linux"			"@_ZN11CBaseEntity26InvalidatePhysicsRecursiveEi"
+			}
+			"CBaseEntity::SetGroundEntity"
+			{
+				"library"		"server"
+				"windows"		""
+				"linux"			"@_ZN11CBaseEntity15SetGroundEntityEPS_"
+			}
+			// "g_EntityListPool"
+			"g_EntityListPool"
+			{
+				"library"		"server"
+				"linux"			"@g_EntityListPool"
+				"windows"		"\x6A\x00\x68\x2A\x2A\x2A\x2A\x6A\x01\x68\x00\x02\x00\x00\x6A\x1C"
+			}
+			"CBaseAnimating::SetPoseParameter"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x8B\x45\x08\xD9\x45\x10"
+				"linux"			"@_ZN14CBaseAnimating16SetPoseParameterEP10CStudioHdrif"
+			}
+			"CBaseAnimating::GetPoseParameter"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x56\x8B\xF1\x57\x80\xBE\x41\x03\x00\x00\x00\x75\x2A\x83\xBE\x6C\x04\x00\x00\x00\x75\x2A\xE8\x2A\x2A\x2A\x2A\x85\xC0\x74\x2A\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x8B\xBE\x6C\x04\x00\x00"
+				"linux"			"@_ZN14CBaseAnimating16GetPoseParameterEi"
+			}
+			"CBaseAnimating::LookupPoseParameter"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x57\x8B\x7D\x08\x85\xFF\x75\x2A\x33\xC0\x5F\x5D\xC2\x08\x00"
+				"linux"			"@_ZN14CBaseAnimating19LookupPoseParameterEP10CStudioHdrPKc"
+			}
+			"CBaseAnimating::SequenceDuration"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x56\x8B\x75\x08\x57\x8B\xF9\x85\xF6\x75\x2A\x8B\x47\x5C"
+				"linux"			"@_ZN14CBaseAnimating16SequenceDurationEP10CStudioHdri"
+			}
+			"CBaseAnimating::ResetSequence"
+			{
+				"library"		"server"
+				"linux"			"@_ZN14CBaseAnimating13ResetSequenceEi"
+				"windows"		"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x53\x56\x57\x83\x78\x30\x00\x8B\xD9\x8B\x7D\x08"
+			}
+			"NextBotGroundLocomotion::NextBotGroundLocomotion"
+			{
+				"library"		"server"
+				"windows"		"\x55\x8B\xEC\x56\xFF\x75\x08\x8B\xF1\xE8\x2A\x2A\x2A\x2A\xC7\x06\x2A\x2A\x2A\x2A\x8B\xC6\xC7\x86\xB0\x00\x00\x00\xFF\xFF\xFF\xFF"
+				"linux"			"@_ZN23NextBotGroundLocomotionC1EP8INextBot"
+			}
+			"NextBotCombatCharacter::NextBotCombatCharacter"
+			{
+				"library"		"server"
+				"windows"		"\x56\x57\x8B\xF9\xE8\x2A\x2A\x2A\x2A\x8D\x8F\x48\x08\x00\x00"
+				"linux"			"@_ZN22NextBotCombatCharacterC1Ev"
+			}
+			"CHalloweenBaseBoss::CHalloweenBaseBoss"
+			{
+				"library"		"server"
+				"windows"		""
+				"linux"			"@_ZN18CHalloweenBaseBossC2Ev"
+			}
+			"DispatchParticleEffect"
+			{
+				"library"		"server"
+				"windows"		""
+				"linux"			"@_Z22DispatchParticleEffectPKc6Vector6QAngleP11CBaseEntity"
+			}
+			"UTIL_GetCommandClient"
+			{
+				"library"		"server"
+				"windows"		""
+				"linux"			"@_Z21UTIL_GetCommandClientv"
+			}
+		}
+	}
+}
