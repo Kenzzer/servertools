@@ -37,178 +37,178 @@
 			}
 			"CBaseEntity::Spawn"
 			{
-				"linux"		"23"
-				"windows"	"22"
-			}
-			"CBaseEntity::Precache"
-			{
-				"linux"		"24"
-				"windows"	"23"
-			}
-			"CBaseEntity::SetModel"
-			{
 				"linux"		"25"
 				"windows"	"24"
 			}
-			"CBaseEntity::PostConstructor"
+			"CBaseEntity::Precache"
+			{
+				"linux"		"26"
+				"windows"	"25"
+			}
+			"CBaseEntity::SetModel"
 			{
 				"linux"		"27"
 				"windows"	"26"
 			}
+			"CBaseEntity::PostConstructor"
+			{
+				"linux"		"29"
+				"windows"	"28"
+			}
 			"CBaseEntity::GetBaseAnimating"
 			{
-				"linux"		"51"
-				"windows"	"50"
+				"linux"		"53"
+				"windows"	"52"
 			}
 			"CBaseEntity::OnTakeDamage"
 			{
-				"linux"		"63"
-				"windows"	"62"
+				"linux"		"65"
+				"windows"	"64"
 			}
 			"CBaseEntity::IsAlive"
 			{
-				"linux"		"66"
-				"windows"	"65"
+				"linux"		"68"
+				"windows"	"67"
 			}
 			"CBaseEntity::Event_Killed"
 			{
-				"linux"		"67"
-				"windows"	"66"
+				"linux"		"69"
+				"windows"	"68"
 			}
 			"CBaseEntity::MyCombatCharacterPointer"
 			{
-				"linux"		"72"
-				"windows"	"71"
+				"linux"		"74"
+				"windows"	"73"
 			}
 			"CBaseEntity::MyNextBotPointer"
 			{
-				"linux"		"73"
-				"windows"	"72"
+				"linux"		"75"
+				"windows"	"74"
 			}
 			"CBaseEntity::IsPlayer"
 			{
-				"linux"		"81"
-				"windows"	"80"
+				"linux"		"83"
+				"windows"	"82"
 			}
 			"CBaseEntity::Touch"
 			{
-				"linux"		"103"
-				"windows"	"102"
+				"linux"		"105"
+				"windows"	"104"
 			}
 			"CBaseEntity::PhysicsSimulate"
 			{
-				"linux"		"108"
-				"windows"	"107"
+				"linux"		"110"
+				"windows"	"109"
 			}
 			"CBaseEntity::UpdateOnRemove"
 			{
-				"linux"		"109"
-				"windows"	"108"
+				"linux"		"111"
+				"windows"	"110"
 			}
 			"CBaseEntity::Teleport"
 			{
-				"linux"		"112"
-				"windows"	"111"
+				"linux"		"114"
+				"windows"	"113"
 			}
 			"CBaseEntity::EyePosition"
 			{
-				"linux"		"134"
-				"windows"	"133"
+				"linux"		"137"
+				"windows"	"136"
 			}
 			"CBaseEntity::EyeAngles"
 			{
-				"linux"		"135"
-				"windows"	"134"
+				"linux"		"138"
+				"windows"	"137"
 			}
 			"CBaseEntity::GetVectors"
 			{
-				"linux"		"140"
-				"windows"	"139"
+				"linux"		"143"
+				"windows"	"142"
 			}
 			"CBaseEntity::WorldSpaceCenter"		
 			{
-				"linux"		"153"
-				"windows"	"152"
+				"linux"		"156"
+				"windows"	"155"
 			}
 			"CBaseAnimating::StudioFrameAdvance"
 			{
-				"linux"		"198"
-				"windows"	"197"
+				"linux"		"201"
+				"windows"	"200"
 			}
 			"CBaseAnimating::DispatchAnimEvents"
-			{
-				"linux"		"210"
-				"windows"	"209"
-			}
-			"CBaseAnimating::HandleAnimEvent"
-			{
-				"linux"		"211"
-				"windows"	"210"
-			}
-			"CBaseAnimating::GetAttachment"
 			{
 				"linux"		"213"
 				"windows"	"212"
 			}
+			"CBaseAnimating::HandleAnimEvent"
+			{
+				"linux"		"214"
+				"windows"	"213"
+			}
+			"CBaseAnimating::GetAttachment"
+			{
+				"linux"		"216"
+				"windows"	"215"
+			}
 			"CBaseCombatCharacter::IsHiddenByFog[Vector]"
 			{
-				"linux"		"248"
-				"windows"	"249"
+				"linux"		"251"
+				"windows"	"252"
 			}
 			"CBaseCombatCharacter::IsHiddenByFog[CBaseEntity]"
 			{
-				"linux"		"249"
-				"windows"	"248"
+				"linux"		"252"
+				"windows"	"251"
 			}
 			"CBaseCombatCharacter::IsHiddenByFog[float]"
 			{
-				"linux"		"250"
-				"windows"	"247"
+				"linux"		"253"
+				"windows"	"250"
 			}
 			"CBaseCombatCharacter::Weapon_Equip"
 			{
-				"linux"		"269"
-				"windows"	"268"
+				"linux"		"272"
+				"windows"	"271"
 			}
 			"CBaseCombatCharacter::Weapon_Drop"
 			{
-				"linux"		"271"
-				"windows"	"270"
+				"linux"		"274"
+				"windows"	"273"
 			}
 			"CBaseCombatCharacter::OnTakeDamage_Alive"
 			{
-				"linux"		"280"
-				"windows"	"279"
+				"linux"		"283"
+				"windows"	"282"
 			}
 			"CBaseCombatCharacter::OnTakeDamage_Dying"
 			{
-				"linux"		"281"
-				"windows"	"280"
+				"linux"		"284"
+				"windows"	"283"
 			}
 			"CBaseCombatCharacter::GetLastKnownArea"
-			{
-				"linux"		"320"
-				"windows"	"319"
-			}
-			"CBaseCombatCharacter::OnNavAreaChanged"
-			{
-				"linux"		"324"
-				"windows"	"323"
-			}
-			"CBaseCombatCharacter::UpdateLastKnownArea"
 			{
 				"linux"		"323"
 				"windows"	"322"
 			}
-			"CHalloweenBaseBoss::GetBossType"
+			"CBaseCombatCharacter::OnNavAreaChanged"
 			{
 				"linux"		"327"
+				"windows"	"326"
+			}
+			"CBaseCombatCharacter::UpdateLastKnownArea"
+			{
+				"linux"		"326"
 				"windows"	"325"
+			}
+			"CHalloweenBaseBoss::GetBossType"
+			{
+				"linux"		"330"
+				"windows"	"329"
 			}
 			"CHalloweenBaseBoss::vtable_entries"
 			{
-				"linux"		"338"
-				"windows"	"333"
+				"linux"		"340"
+				"windows"	"335"
 			}
 			"INextBot::vtable_entries"
 			{
@@ -281,13 +281,13 @@
 			"Studio_FindAttachment"
 			{
 				"library"		"server"
-				"windows"		"\x55\x8B\xEC\x53\x56\x57\x8B\x7D\x08\x85\xFF"
+				"windows"		"\x55\x8B\xEC\x53\x56\x57\x8B\x7D\x08\x85\xFF\x74\x2A\x8B\xCF"
 				"linux"			"@_Z21Studio_FindAttachmentPK10CStudioHdrPKc"
 			}
 			"SimThink_EntityChanged"
 			{
 				"library"		"server"
-				"windows"		"\x55\x8B\xEC\x53\x57\x8B\x7D\x08\x8B\xD9\xF6\x87\x14\x01\x00\x00\x01"
+				"windows"		"\x55\x8B\xEC\x2A\x57\x8B\x7D\x08\x8B\x2A\xF6\x87\x2A\x01\x00\x00\x01"
 				"linux"			"@_Z22SimThink_EntityChangedP11CBaseEntity"
 			}
 			// Find ".?AVCRallyPoint@@" to get to CRallyPoint's type descriptor -> complete object locator -> vtable
@@ -317,7 +317,7 @@
 			"CBaseEntity::CalcAbsolutePosition"
 			{
 				"library"		"server"
-				"windows"		"\x55\x8B\xEC\x81\xEC\x80\x00\x00\x00\x56\x8B\xF1\x8B\x86\x14\x01\x00\x00"
+				"windows"		"\x55\x8B\xEC\x81\xEC\x80\x00\x00\x00\x56\x8B\xF1\x8B\x86\x2A\x01\x00\x00"
 				"linux"			"@_ZN11CBaseEntity20CalcAbsolutePositionEv"
 			}
 			"CBaseEntity::InvalidatePhysicsRecursive"
@@ -348,7 +348,7 @@
 			"CBaseAnimating::GetPoseParameter"
 			{
 				"library"		"server"
-				"windows"		"\x55\x8B\xEC\x56\x8B\xF1\x57\x80\xBE\x41\x03\x00\x00\x00\x75\x2A\x83\xBE\x6C\x04\x00\x00\x00\x75\x2A\xE8\x2A\x2A\x2A\x2A\x85\xC0\x74\x2A\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x8B\xBE\x6C\x04\x00\x00"
+				"windows"		"\x55\x8B\xEC\x56\x8B\xF1\x57\x80\xBE\x2A\x03\x00\x00\x00\x75\x2A\x83\xBE\x2A\x04\x00\x00\x00\x75\x2A\xE8\x2A\x2A\x2A\x2A\x85\xC0\x74\x2A\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x8B\xBE\x2A\x04\x00\x00"
 				"linux"			"@_ZN14CBaseAnimating16GetPoseParameterEi"
 			}
 			"CBaseAnimating::LookupPoseParameter"
@@ -372,13 +372,13 @@
 			"NextBotGroundLocomotion::NextBotGroundLocomotion"
 			{
 				"library"		"server"
-				"windows"		"\x55\x8B\xEC\x56\xFF\x75\x08\x8B\xF1\xE8\x2A\x2A\x2A\x2A\xC7\x06\x2A\x2A\x2A\x2A\x8B\xC6\xC7\x86\xB0\x00\x00\x00\xFF\xFF\xFF\xFF"
+				"windows"		"\x55\x8B\xEC\x56\xFF\x75\x08\x8B\xF1\xE8\x2A\x2A\x2A\x2A\xC7\x06\x2A\x2A\x2A\x2A\x8B\xC6\xC7\x86\xB4\x00\x00\x00\xFF\xFF\xFF\xFF"
 				"linux"			"@_ZN23NextBotGroundLocomotionC1EP8INextBot"
 			}
 			"NextBotCombatCharacter::NextBotCombatCharacter"
 			{
 				"library"		"server"
-				"windows"		"\x56\x57\x8B\xF9\xE8\x2A\x2A\x2A\x2A\x8D\x8F\x48\x08\x00\x00"
+				"windows"		"\x56\x57\x8B\xF9\xE8\x2A\x2A\x2A\x2A\x8D\x8F\x74\x08\x00\x00"
 				"linux"			"@_ZN22NextBotCombatCharacterC1Ev"
 			}
 			"CHalloweenBaseBoss::CHalloweenBaseBoss"
